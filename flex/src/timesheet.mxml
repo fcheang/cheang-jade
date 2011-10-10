@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" xmlns="*" currentState="login" 
+	pageTitle="Timesheet Management System" name="Timesheet Management System">
+
+	<mx:Style source="timesheet.css"/>
+
+	<mx:Script source="main.as"/>
+
+	<mx:RemoteObject id="loginRO" destination="loginService">
+		<mx:method name="login" fault="genericFaultHandler(event)" result="loginResultHandler(event)"/>
+	</mx:RemoteObject>
+	
+	<mx:RemoteObject id="timesheetRO" destination="timesheetService">
+		<mx:method name="findAll" fault="genericFaultHandler(event)" result="tsFindAllResultHandler(event)"/>
+		<mx:method name="createOrUpdateTimesheet" fault="genericFaultHandler(event)" result="tsUpdateResultHandler(event)"/>
+		<mx:method name="generateReport" fault="genericFaultHandler(event)" result="tsReportResultHandler(event)"/>
+		<mx:method name="getAllEmployee" fault="genericFaultHandler(event)" result="getAllEmployeeResultHandler(event)"/>
+		<mx:method name="generateEmployeeReport" fault="genericFaultHandler(event)" result="empReportResultHandler(event)"/>		
+	</mx:RemoteObject>
+	
+	<mx:states>
+		<mx:State name="login">
+			<mx:RemoveChild target="{mainPanel}"/>
+			<mx:AddChild position="lastChild">
+				<mx:Image source="images/bhr_header.jpg"/>
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:Panel width="356" height="200" layout="absolute" title="Timesheet Management System">
+					<mx:Form x="10" y="10" id="form1">
+						<mx:FormItem label="User ID: ">
+							<mx:TextInput id="useridTI"/>
+						</mx:FormItem>			
+						<mx:FormItem label="Password: ">
+							<mx:TextInput id="pswdTI" displayAsPassword="true"/>
+						</mx:FormItem>
+					</mx:Form>
+					<mx:ControlBar id="controlbar1">
+						<mx:Button label="Login" id="loginB" click="this.login();"/>
+					</mx:ControlBar>	
+				</mx:Panel>
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:Label text="SuntekSystems Inc., 2009"/>
+			</mx:AddChild>
+			<mx:RemoveChild target="{button1}"/>
+		</mx:State>
+		<mx:State name="summary">
+			<mx:SetProperty target="{detailPanel}" name="width" value="0%"/>
+		</mx:State>
+	</mx:states>
+
+	<!-- Validator -->
+	<mx:StringValidator source="{useridTI}" property="text" required="true" requiredFieldError="Missing UserId"/>
+	<mx:StringValidator source="{pswdTI}" property="text" required="true" requiredFieldError="Missing Password"/>
+	<mx:NumberValidator id="workedTIValidator" source="{workedTI}" property="text" required="true" requiredFieldError="Missing hours worked."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Hours worked cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Hours worked cannot be less than 0."/>
+	<mx:NumberValidator id="overtimeTIValidator" source="{overtimeTI}" property="text" required="true" requiredFieldError="Missing overtime hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Overtime hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Overtime hours cannot be less than 0."/>
+	<mx:NumberValidator id="vacationTIValidator" source="{vacationTI}" property="text" required="true" requiredFieldError="Missing vacation hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Vacation hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Vacation hours cannot be less than 0."/>
+	<mx:NumberValidator id="sickTIValidator" source="{sickTI}" property="text" required="true" requiredFieldError="Missing sick hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Sick hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Sick hours cannot be less than 0."/>
+	<mx:NumberValidator id="floatingTIValidator" source="{floatingTI}" property="text" required="true" requiredFieldError="Missing floating hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Floating hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Floating hours cannot be less than 0."/>
+	<mx:NumberValidator id="holidayTIValidator" source="{holidayTI}" property="text" required="true" requiredFieldError="Missing holiday hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Holiday hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Holiday hours cannot be less than 0."/>
+	<mx:NumberValidator id="otherTIValidator" source="{otherTI}" property="text" required="true" requiredFieldError="Missing other hours."
+		allowNegative="false" decimalSeparator="." domain="real" minValue="0" maxValue="8" precision="2"
+	    precisionError="The number entered has too many digits. At most two decimal places is allowed."
+	    exceedsMaxError="Other hours cannot be more than 8 hours."
+	    invalidCharError="Only numeric value is allowed."
+	    lowerThanMinError="Other hours cannot be less than 0."/>
+	
+	<!-- Binding -->
+	<mx:Binding source="nameTI.text" destination="timesheetDG.selectedItem.name"/>
+	<mx:Binding source="locTI.text" destination="timesheetDG.selectedItem.location"/>
+	<mx:Binding source="workedTI.text" destination="timesheetDG.selectedItem.worked"/>
+	<mx:Binding source="overtimeTI.text" destination="timesheetDG.selectedItem.overtime"/>
+	<mx:Binding source="vacationTI.text" destination="timesheetDG.selectedItem.vacation"/>
+	<mx:Binding source="sickTI.text" destination="timesheetDG.selectedItem.sick"/>
+	<mx:Binding source="floatingTI.text" destination="timesheetDG.selectedItem.floating"/>
+	<mx:Binding source="holidayTI.text" destination="timesheetDG.selectedItem.holiday"/>
+	<mx:Binding source="otherTI.text" destination="timesheetDG.selectedItem.other"/>
+	<mx:Binding source="commentsTA.text" destination="timesheetDG.selectedItem.comments"/>
+	<mx:Binding source="totalTI.text" destination="timesheetDG.selectedItem.total"/>
+
+
+	<mx:DateFormatter id="dateFormatter" formatString="MM/DD/YYYY"/>
+
+	<mx:Panel id="mainPanel" title="Timesheet Management System" height="100%" width="100%">
+    	<mx:TabNavigator id="tn"  width="100%" height="100%">
+    		<mx:VBox id="tsTab" label="Timesheet">    		
+				<mx:HDividedBox id="hdividedbox1" width="100%" height="100%">		
+					<mx:Panel title="Summary" width="100%" height="100%" id="summaryPanel">
+						<mx:DateField id="currDateDF" change="useDate(event)" selectedDate="{new Date()}"/>
+						<mx:DataGrid id="timesheetDG" width="100%" height="100%" 
+							horizontalScrollPolicy="auto" verticalScrollPolicy="auto" 
+							dataProvider="{tsAC}"
+							itemClick="showOrHideDetailPanel()"
+							resizeEffect="Resize">
+							<mx:columns>
+									<mx:DataGridColumn headerText="EmployeeSeq" dataField="employeeSeq" width="0" visible="false"/>
+									<mx:DataGridColumn headerText="Date" dataField="date" width="0" visible="false"/>
+									<mx:DataGridColumn headerText="Name" dataField="name" width="150" editable="false"/>
+									<mx:DataGridColumn headerText="Location" dataField="location" width="65" editable="false"/>
+									<mx:DataGridColumn headerText="Worked" dataField="worked" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Overtime" dataField="overtime" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Vacation" dataField="vacation" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Sick" dataField="sick" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Floating" dataField="floating" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Holiday" dataField="holiday" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Other" dataField="other" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Total" dataField="total" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Comments" dataField="comments" width="300"/>
+							</mx:columns>
+						</mx:DataGrid>
+						<mx:ControlBar>
+						</mx:ControlBar>
+					</mx:Panel>
+					<mx:Panel title="Details" width="70%" height="100%" id="detailPanel">			
+						<mx:Form id="timesheetForm" width="100%" horizontalScrollPolicy="auto" verticalScrollPolicy="auto">	
+							<mx:FormItem label="Name">
+								<mx:TextInput id="nameTI" text="{timesheetDG.selectedItem.name}" editable="false"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Location">
+								<mx:TextInput id="locTI" text="{timesheetDG.selectedItem.location}" editable="false"/>
+							</mx:FormItem>				
+							<mx:FormItem label="Worked">
+								<mx:TextInput id="workedTI" text="{formatDecimalValue(timesheetDG.selectedItem.worked)}" change="validateForm();"/>
+							</mx:FormItem>		
+							<mx:FormItem label="Overtime">
+								<mx:TextInput id="overtimeTI" text="{formatDecimalValue(timesheetDG.selectedItem.overtime)}" change="validateForm();"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Vacation" >
+								<mx:TextInput id="vacationTI" text="{formatDecimalValue(timesheetDG.selectedItem.vacation)}" change="validateForm();"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Sick">
+								<mx:TextInput id="sickTI" text="{formatDecimalValue(timesheetDG.selectedItem.sick)}" change="validateForm();"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Floating">
+								<mx:TextInput id="floatingTI" text="{formatDecimalValue(timesheetDG.selectedItem.floating)}" change="validateForm();"/>
+							</mx:FormItem>							
+							<mx:FormItem label="Holiday">
+								<mx:TextInput id="holidayTI" text="{formatDecimalValue(timesheetDG.selectedItem.holiday)}" change="validateForm();"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Other">
+								<mx:TextInput id="otherTI" text="{formatDecimalValue(timesheetDG.selectedItem.other)}" change="validateForm();"/>
+							</mx:FormItem>			
+							<mx:FormItem label="Total">
+								<mx:TextInput id="totalTI" text="{formatDecimalValue(timesheetDG.selectedItem.total)}" editable="false"/>
+							</mx:FormItem>							
+							<mx:FormItem label="Comments" width="100%">
+								<mx:TextArea id="commentsTA" width="100%" height="50" text="{timesheetDG.selectedItem.comments}"/>
+							</mx:FormItem>				
+						</mx:Form>		
+						<mx:ControlBar>
+							<mx:Button id="updateTSBtn" enabled="{formIsValid}" label="Update" click="updateTimesheet(Timesheet(timesheetDG.selectedItem));"/>
+						</mx:ControlBar>
+					</mx:Panel>				
+				</mx:HDividedBox>	
+			</mx:VBox>		
+			<mx:VBox id="weeklyRptTab" label="Weekly Report">
+					<mx:Panel width="100%" height="100%" id="reportPanel">
+						<mx:HBox>
+							<mx:Label text=" From:"/>
+							<mx:DateField id="reportStartDateDF"/>						
+							<mx:Label text=" To:"/>							
+							<mx:DateField id="reportEndDateDF"/>
+						</mx:HBox>
+						<mx:DataGrid id="reportDG" width="100%" height="100%" 
+							horizontalScrollPolicy="auto" verticalScrollPolicy="auto" 
+							dataProvider="{tsReportAC}">
+							<mx:columns>
+									<mx:DataGridColumn headerText="Period" dataField="period" width="140"/>
+									<mx:DataGridColumn headerText="Name" dataField="name" width="150"/>
+									<mx:DataGridColumn headerText="Location" dataField="location" width="65"/>
+									<mx:DataGridColumn headerText="Worked" dataField="worked" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Overtime" dataField="overtime" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Vacation" dataField="vacation" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Sick" dataField="sick" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Floating" dataField="floating" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Holiday" dataField="holiday" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Other" dataField="other" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Total" dataField="total" width="65" labelFunction="decimalLabelFunction"/>
+							</mx:columns>
+						</mx:DataGrid>
+						<mx:ControlBar>
+							<mx:HBox>
+								<mx:Button id="genRptBtn" label="Generate" click="generateReport()"/>
+								<mx:Button id="printRptBtn" label="Print" click="printTsReport()"/>
+							</mx:HBox>
+						</mx:ControlBar>						
+					</mx:Panel>
+            </mx:VBox>
+			<mx:VBox id="empRptTab" label="Employee Report">
+					<mx:Panel width="100%" height="100%" id="empRptPanel">
+						<mx:HBox id="hbox1">
+							<mx:Label text=" From:"/>
+							<mx:DateField id="empRptStartDateDF"/>						
+							<mx:Label text=" To:"/>							
+							<mx:DateField id="empRptEndDateDF"/>
+							<mx:Label text=" Employee:"/>
+							<mx:ComboBox id="empRptCB" dataProvider="{empAC}" labelField="fullName" />
+						</mx:HBox>
+						<mx:DataGrid id="empReportDG" width="100%" height="100%" 
+							horizontalScrollPolicy="auto" verticalScrollPolicy="auto" 
+							dataProvider="{empReportAC}">
+							<mx:columns>
+									<mx:DataGridColumn headerText="Date" dataField="date" width="140" labelFunction="formatDate"/>
+									<mx:DataGridColumn headerText="Location" dataField="location" width="65"/>
+									<mx:DataGridColumn headerText="Worked" dataField="worked" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Overtime" dataField="overtime" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Vacation" dataField="vacation" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Sick" dataField="sick" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Floating" dataField="floating" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Holiday" dataField="holiday" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Other" dataField="other" width="65" labelFunction="decimalLabelFunction"/>
+									<mx:DataGridColumn headerText="Total" dataField="total" width="65" labelFunction="decimalLabelFunction"/>
+							</mx:columns>
+						</mx:DataGrid>
+						<mx:ControlBar>
+							<mx:HBox>
+								<mx:Button id="genEmpRptBtn" label="Generate" click="this.generateEmployeeReport()"/>
+								<mx:Button id="printEmpRptBtn" label="Print" click="this.printEmpReport()"/>
+							</mx:HBox>
+						</mx:ControlBar>						
+					</mx:Panel>
+            </mx:VBox>            
+		</mx:TabNavigator>			
+		<mx:HBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10">
+			<mx:Button label="Logout" click="this.logout()" id="button1"/>		
+		</mx:HBox>
+	</mx:Panel>	
+</mx:Application>

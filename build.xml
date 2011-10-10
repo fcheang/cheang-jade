@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Timesheet Application" basedir="." default="main">
+
+    <property name="FLEX_HOME" value="C:/flex_sdk_3"/>
+    <property name="DEPLOY_DIR" value="C:/Program Files/Apache Software Foundation/Tomcat 5.5/webapps/blazeds"/>
+    <property name="CONTEXT_ROOT" value="blazeds"/>
+
+    <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"  />
+
+    <target name="main" depends="compile-flex,html-wrapper,compile-java,copy-configfile"/>
+    
+    <target name="copy-configfile">
+    	<copy todir="${DEPLOY_DIR}/WEB-INF/flex">
+    		<fileset dir="blazeds/WEB-INF/flex"/>
+  		</copy>				
+		<copy file="blazeds/WEB-INF/applicationContext.xml" todir="${DEPLOY_DIR}/WEB-INF"/>		   <copy file="blazeds/WEB-INF/web.xml" todir="${DEPLOY_DIR}/WEB-INF"/>
+	</target>
+	
+    <target name="compile-flex">
+        <mxmlc file="flex/src/timesheet.mxml" 
+        	services="blazeds/WEB-INF/flex/services-config.xml"
+        	context-root="${CONTEXT_ROOT}"
+			output="${DEPLOY_DIR}/timesheet/timesheet.swf"/>
+    	<copy todir="${DEPLOY_DIR}/timesheet/images">
+    		<fileset dir="flex/src/images"/>
+  		</copy>			
+    </target>
+
+    <target name="compile-java">
+        <javac srcdir="java/src" destdir="${DEPLOY_DIR}/WEB-INF/classes" 
+        	classpath="java/lib/spring.jar;java/lib/log4j-1.2.14.jar"/>
+    </target>
+
+	<target name="html-wrapper">
+        <html-wrapper 
+              application="app"
+              width="100%"
+              height="100%"
+              swf="timesheet"
+              version-major="9"
+              version-minor="0"
+              version-revision="0"
+              history="true"              
+              template="express-installation"
+              output="${DEPLOY_DIR}/timesheet"/>
+    </target>
+
+    <!-- Create binary distribution -->
+    <target name="dist" description="Create binary distribution">
+      <jar jarfile="${CONTEXT_ROOT}.war" basedir="${DEPLOY_DIR}"/>
+    </target>
+    
+</project>
