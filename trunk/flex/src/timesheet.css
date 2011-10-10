@@ -1,0 +1,17 @@
+Application {
+	background-color: #CCCC99;
+	themeColor: #CCCC99;
+}
+Alert
+{
+	background-color: #CCCC99;
+}
+
+Panel {
+	roundedBottomCorners: true;
+}
+
+.emphasized {
+	color: #CCCC99;
+}
+

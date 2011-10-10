@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/jade?autoReconnect=true"/>
+		<property name="username" value="steve"/>
+		<property name="password" value="st3v3"/>
+	</bean>
+	<bean id="loginDAOBean" class="com.suntek.timesheet.LoginDAOImpl">
+		<property name="dataSource" ref="dataSource"/>
+	</bean> 	
+	<bean id="timesheetDAOBean" class="com.suntek.timesheet.TimesheetDAOImpl">
+		<property name="dataSource" ref="dataSource"/>
+	</bean> 		
+</beans> 

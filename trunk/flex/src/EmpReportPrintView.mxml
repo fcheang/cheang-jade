@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<mx:VBox 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:MyComp="*" 
+    backgroundColor="#FFFFFF"
+    paddingTop="10" paddingBottom="10" paddingLeft="10">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.core.*
+            
+            // Declare and initialize the variables used in the component.
+            // The application sets the actual prodTotal value.
+            [Bindable]
+            public var pageNumber:Number = 1;
+            [Bindable]
+            public var prodTotal:Number = 0;
+
+            // Control the page contents by selectively hiding the header and
+            // footer based on the page type.
+            public function showPage(pageType:String):void {
+                if(pageType == "first" || pageType == "middle") {
+                    // Hide the footer.
+                    footer.includeInLayout=false;
+                    footer.visible = false;
+                }
+                if(pageType == "middle" || pageType == "last") {
+                    // The header won't be used again; hide it.
+                    header.includeInLayout=false;
+                    header.visible = false;
+                }
+                if(pageType == "last") {
+                    // Show the footer.
+                    footer.includeInLayout=true;
+                    footer.visible = true;
+                }
+                //Update the DataGrid layout to reflect the results.
+                validateNow();
+            }
+            
+			private function decimalLabelFunction(item:Object, column:DataGridColumn):String {
+				var cell:Object = item[column.dataField];
+				return formatDecimalValue(cell);
+			}
+            
+			private function formatDecimalValue(obj:Object):String {
+				if (obj is Number){
+					var str:String = Number(obj).toFixed(2);
+					var i:int = str.indexOf(".");
+					if (str.substring(i+1, str.length) == "00"){
+						return str.substring(0, i);
+					}else{
+						return str;
+					}
+				}else{
+					return String(obj);
+				}
+			}
+			
+			private function formatDate(item:Object, column:DataGridColumn):String {
+				var cell:Object = item[column.dataField];
+				return dateFormatter.format(cell);
+			}
+			            
+        ]]>
+    </mx:Script>
+
+	<mx:DateFormatter id="dateFormatter" formatString="MM/DD/YYYY"/>
+	
+    <!-- The template for the printed page, 
+        with the contents for all pages. -->
+    <mx:VBox width="80%" horizontalAlign="left">
+        <mx:Label text="Page {pageNumber}"/>
+    </mx:VBox>
+    <MyComp:FormPrintHeader id="header"/>
+    
+    <!-- The sizeToPage property is true by default, so the last
+        page has only as many grid rows as are needed for the data. -->
+    <mx:PrintDataGrid id="myDataGrid" width="100%" height="100%">
+    <!-- Specify the columns to ensure that their order is correct. -->
+        <mx:columns>
+			<mx:DataGridColumn headerText="Date" dataField="date" width="120" labelFunction="formatDate"/>
+			<mx:DataGridColumn headerText="Location" dataField="location" width="120"/>
+			<mx:DataGridColumn headerText="Work" dataField="worked" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Overtime" dataField="overtime" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Vac" dataField="vacation" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Sick" dataField="sick" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Float" dataField="floating" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Holiday" dataField="holiday" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Other" dataField="other" width="60" labelFunction="decimalLabelFunction"/>
+			<mx:DataGridColumn headerText="Total" dataField="total" width="60" labelFunction="decimalLabelFunction"/>
+        </mx:columns>
+    </mx:PrintDataGrid>
+    
+    <!-- Create a FormPrintFooter control 
+        and set its prodTotal variable. -->
+    <MyComp:FormPrintFooter id="footer" pTotal="{prodTotal}"/>
+</mx:VBox>

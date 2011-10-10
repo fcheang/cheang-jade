@@ -1,0 +1,9 @@
+﻿DROP TABLE IF EXISTS `jade`.`standardholiday`;
+DROP TABLE IF EXISTS `jade`.`timesheet`;
+DROP TABLE IF EXISTS `jade`.`viewmapping`;
+DROP TABLE IF EXISTS `jade`.`employee`;
+DROP TABLE IF EXISTS `jade`.`user`;
+DROP TABLE IF EXISTS `jade`.`role`;
+DROP TABLE IF EXISTS `jade`.`location`;
+DROP TABLE IF EXISTS `jade`.`employeeview`;
+DROP TABLE IF EXISTS `jade`.`type`;
